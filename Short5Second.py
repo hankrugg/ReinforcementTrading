@@ -116,7 +116,7 @@ async def run_trading_strategy():
     bid_price, volume, time = process_latest_data(symbol)
     # Run the strategy
     decision = strategy_1.run(bid_price, volume, time)
-    send_email('Johnny Decision', f'{decision} {symbol} at {bid_price}: {time}')
+    send_email('Johnny Decision', f'{decision} {symbol} at {bid_price[-1]}: {datetime.fromtimestamp(time[-1])}')
     sys.exit(1)
 
 
