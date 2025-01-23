@@ -89,16 +89,7 @@ def process_latest_data(symbol):
     time = latest_data.index.to_pydatetime()
     time = [x.timestamp() for x in time]
 
-    # Log the extracted and calculated data
-    # print(f"Bid Price: {bid_price}")
-    # print(f"Current Volume: {volume}")
-    # print(f'Current time:{time}')
-
-    # print(bid_price, volume, time)
-
     return bid_price, volume, time
-
-
 
 # Email functions
 def send_email(subject, body):
@@ -119,93 +110,22 @@ def send_email(subject, body):
         print(f"Failed to send email: {e}")
 
 
-def send_trade_summary_email(trades_1, portfolio_value_1):
-    subject = "Daily Trade Summary"
-    body = f"Daily Reinforcement Strategy - Final Portfolio Value: ${portfolio_value_1:.2f}\n\nTrades:\n"
-    for trade in trades_1:
-        body += trade
-
-    send_email(subject, body)
-
-
-# Time calculations
-def calculate_time_until_next_market_open():
-    now = datetime.now(eastern)
-    today_open = now.replace(hour=9, minute=30, second=0, microsecond=0)
-    if now >= today_open:
-        tomorrow = now + timedelta(days=1)
-        next_open = tomorrow.replace(hour=9, minute=30, second=0, microsecond=0)
-    else:
-        next_open = today_open
-    time_until_open = next_open - now
-    return time_until_open
-
-def send_intro_email():
-    time_until_open = calculate_time_until_next_market_open()
-    subject = "Daily Program Starting"
-    body = f"The trading program has started successfully.\nTime until next market open: {time_until_open}"
-    send_email(subject, body)
-
-
-def send_ending_email(portfolio_value_1):
-    time_until_open = calculate_time_until_next_market_open()
-    subject = "Program Ending"
-    body = f"Daily ShortReinforcementStrategy - Final Portfolio Value: ${portfolio_value_1:.2f}\nTime until next market open: {time_until_open}"
-    send_email(subject, body)
-
-async def hourly_email_update():
-    while True:
-        subject = "Daily Portfolio Update"
-        body = f"ShortReinforcementStrategy Daily - Current Portfolio Value: ${portfolio_value_1[-1]:.2f}"
-        send_email(subject, body)
-        await asyncio.sleep(3600)  # Send email every hour
-
-
-# Market close email
-async def schedule_email_at_market_close():
-    market_close_time = datetime.now(eastern).replace(hour=16, minute=0, second=0, microsecond=0)
-    while True:
-        now = datetime.now(eastern)
-        if now >= market_close_time:
-            print("Daily ShortReinforcementStrategy Market closed. Sending email summary...")
-            send_trade_summary_email(strategy_1.trades, portfolio_value_1[-1])
-            send_ending_email(portfolio_value_1[-1])
-            dotenv.set_key('.env', 'balance', str(portfolio_value_1[-1]))
-            sys.exit()
-        await asyncio.sleep(60)
-
-
 # Function to get the latest price and run the strategy
 async def run_trading_strategy():
     symbol = 'TSLA'  # Replace with the desired stock symbol
-    while True:
-        # try:
-            bid_price, volume, time = process_latest_data(symbol)
-            if bid_price is not None:
-                # Run the strategy
-                strategy_1.run(bid_price, volume, time)
-                global portfolio_value_1
-                portfolio_value_1 = strategy_1.calculate_portfolio_value(bid_price)
-
-            # Wait for the next 5 seconds (you can adjust this to match the timing of minute data updates)
-            await asyncio.sleep(60)
-
-        # except Exception as e:
-        #     print(f"An error occurred during strategy execution: {e}")
-        #     await asyncio.sleep(60)
+    bid_price, volume, time = process_latest_data(symbol)
+    # Run the strategy
+    decision = strategy_1.run(bid_price, volume, time)
+    send_email('Johnny Decision', f'{decision} {symbol} at {bid_price}: {time}')
+    sys.exit(1)
 
 
 # Main function
 async def main():
-    print("Program started.")
-    send_intro_email()
 
     await asyncio.gather(
         run_trading_strategy(),
-        schedule_email_at_market_close(),
-        hourly_email_update()
     )
-
 
 # Run the event loop
 asyncio.run(main())

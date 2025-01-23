@@ -39,6 +39,7 @@ class ShortReinforcementStrategy(TradingStrategy):
         - rl_model: The trained RL model that outputs actions.
         :param **kwargs:
         """
+        decision = ''
         # Predict the action using the RL model (deterministic=True for real-time decision making)
         action, _ = self.model.predict(obs, deterministic=True)
 
@@ -47,36 +48,44 @@ class ShortReinforcementStrategy(TradingStrategy):
             if self.short_stock_count > 0:  # Cover short if in a short position
                 self.cover_short(price)
                 self.trades.append(f"Cover short stock at {price}.")
+                decision = 'Cover Short'
                 print(f"Cover short at price: {price}")
             elif self.can_buy(price):  # Only buy if not holding any stock
                 self.buy(price)
                 self.trades.append(f"Buy at price: {price}.")
+                decision = 'Buy'
                 print(f"Buy at price: {price}")
             else:
                 if self.verbose:
                     self.trades.append(f"Cannot buy at price: {price}.")
+                    decision = 'Cannot Buy'
                     print(f"Cannot buy at price {price}, insufficient balance.")
 
         elif action == 1:  # Sell/Short
             if self.stock_count > 0:  # Sell long position
                 self.sell(price)
                 self.trades.append(f"Sell at price: {price}.")
+                decision = 'Sell'
                 print(f"Sell at price: {price}")
             elif self.short_stock_count == 0:  # Open short if no position is held
                 if self.can_short(price):  # Ensure balance is enough to short
                     self.short(price)
                     self.trades.append(f"Short stock at price: {price}.")
+                    decision = 'Short'
                     print(f"Short at price: {price}")
             else:
                 if self.verbose:
                     self.trades.append(f"Cannot short at price: {price}.")
+                    decision = 'Cannot Short'
                     print(f"Cannot short at price {price}, already in a short position.")
 
         elif action == 2:  # Hold
             if self.verbose:
                 self.trades.append(f"Hold at price: {price}.")
+                decision = 'Hold'
                 print(f"Holding at price {price}")
 
+        return decision
     def run(self, price, volume, time):
         """Run the strategy for each incoming price tick."""
         # Initialize the first candle if none exists
@@ -107,7 +116,7 @@ class ShortReinforcementStrategy(TradingStrategy):
                 # Make a decision before starting a new candle
                 # if self.verbose:
                 print(f"Making Decision")
-                self.make_decision(tensors, price[-1])
+                decision = self.make_decision(tensors, price[-1])
 
             # Archive the current candle and start a new one
             self.candle_history.append(self.current_candle)
@@ -118,6 +127,8 @@ class ShortReinforcementStrategy(TradingStrategy):
             portfolio_value = self.calculate_portfolio_value(price)
             self.trades.append(f"Portfolio Value: {portfolio_value}")
             print(f"Portfolio Value: {portfolio_value}")
+
+        return decision
 
     def start(self, price, volume, time):
         """Initialize the first candle and start tracking."""
