@@ -42,11 +42,12 @@ python TrainShortBot.py
 This will process market data and update the RL model over time.  
 
 
-### 3. Deploy for Live Trading  
+### 2. Deploy for Live Trading  
 To run the bot in a live market, ensure you have API access to a brokerage and execute:  
 ```sh
 python RunBot.py  
 ```
+This can be set up using cron jobs in a Linux environment to fully automate all aspects.
 
 ## Customization  
 - Modify the reward function in to experiment with different trading objectives.  
