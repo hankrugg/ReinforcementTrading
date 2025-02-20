@@ -1,3 +1,5 @@
 .env
 .idea
-
+/__pycache__
+trading_scaler.pkl
+ppo_trading_model_short.zip

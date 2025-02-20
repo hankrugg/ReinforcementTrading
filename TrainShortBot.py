@@ -207,7 +207,7 @@ early_stopping_callback = EarlyStoppingCallback(patience=10000)
 validating_model.set_env(validating_env)
 validating_model.learn(total_timesteps=10000000, callback=early_stopping_callback, reset_num_timesteps=False)
 
-# Optionally save the model again if needed
+# Save the model again
 validating_model.save("ppo_trading_model_short")
 
 

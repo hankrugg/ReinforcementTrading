@@ -25,18 +25,18 @@ api_key = os.getenv("api_key")
 app_secret = os.getenv("app_secret")
 account_id = os.getenv("account_id")
 token_path = "../Lamar/tokens/tokens.json"
-email_user = os.getenv("email_user")  # Your email
-email_password = os.getenv("email_password")  # Your email password
+email_user = os.getenv("email_user")
+email_password = os.getenv("email_password")
 starting_balance = os.getenv("balance")
 
 # Initialize the Schwab client
 client = client_from_token_file(token_path, api_key, app_secret)
 
 # Initialize your strategy
-strategy_1 = ShortReinforcementStrategy(verbose=True)  # Example strategy
+strategy_1 = ShortReinforcementStrategy(verbose=True)
 
 trades_1 = []
-portfolio_value_1 = float(starting_balance)  # Initial portfolio value
+portfolio_value_1 = float(starting_balance)
 previous_volume = 0
 eastern = pytz.timezone('US/Eastern')
 
@@ -122,7 +122,6 @@ async def run_trading_strategy():
 
 # Main function
 async def main():
-
     await asyncio.gather(
         run_trading_strategy(),
     )
