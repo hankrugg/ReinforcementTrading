@@ -4,3 +4,5 @@
 trading_scaler.pkl
 ppo_trading_model_short.zip
 *__pycache__
+
+*/__pycache__
